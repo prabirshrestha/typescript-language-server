@@ -1,0 +1,25 @@
+{
+  "name": "typescript-language-server",
+  "version": "0.0.1",
+  "description": "Language Server Protocol (LSP) implementation for TypeScript using tsserver",
+  "scripts": {
+    "build": "tsc -p src",
+    "watch": "tsc --watch -p src",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "bin": {
+    "typescript-language-server": "./bin/typescript-language-server"
+  },
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^8.0.19",
+    "@types/pino": "^3.0.1",
+    "typescript": "^2.4.2"
+  },
+  "dependencies": {
+    "pino": "^4.7.1",
+    "tempy": "^0.1.0",
+    "vscode-languageserver": "^3.3.0"
+  }
+}
