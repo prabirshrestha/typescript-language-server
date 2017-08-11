@@ -10,6 +10,12 @@ npm install -g typescript-language-server
 typescript-language-server --stdio
 ```
 
+# Running the language server
+
+```
+typescript-language-server --stdio
+```
+
 # Development
 
 ### Build
