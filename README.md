@@ -7,7 +7,6 @@ Language Server Protocol implementation for Typescript via tsserver.cmd :warning
 
 ```sh
 npm install -g typescript-language-server
-typescript-language-server --stdio
 ```
 
 # Running the language server
@@ -15,6 +14,8 @@ typescript-language-server --stdio
 ```
 typescript-language-server --stdio
 ```
+
+**Note:** `typescript-language-server` requires `tsserver` to be in path. You can install it using `npm install -g typescript`.
 
 # Development
 
