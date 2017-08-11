@@ -7,6 +7,8 @@ export function createLogger(logFile?: string): ILogger {
     if (logFile) {
         return pino(fs.createWriteStream(logFile));
     } else {
-        return pino();
+        const logger = pino();
+        logger.level = 'silent';
+        return logger;
     }
 }
