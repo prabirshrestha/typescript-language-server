@@ -25,6 +25,7 @@ typescript-language-server --stdio
 * textDocument/didClose
 * textDocument/didOpen
 * textDocument/didSave
+* textDocument/hover
 * textDocument/references
 
 # Development
