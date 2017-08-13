@@ -10,6 +10,8 @@ import {
     InitializeParams,
     InitializeResult,
     Location,
+    SymbolKind,
+    SymbolInformation,
     TextDocumentPositionParams,
     TextDocumentSyncKind
 } from 'vscode-languageserver';
@@ -19,6 +21,8 @@ import * as fs from 'fs';
 
 import { ILogger, createLogger } from './logger';
 import { TsServerClient } from './tsServerClient';
+
+import * as TsProtocol from 'typescript/lib/protocol';
 
 import * as utils from './utils';
 
@@ -53,6 +57,7 @@ export class Server {
         this.connection.onDidCloseTextDocument(this.onDidCloseTextDocument.bind(this));
         this.connection.onDidChangeTextDocument(this.onDidChangeTextDocument.bind(this));
         this.connection.onDefinition(this.onDefinition.bind(this));
+        this.connection.onDocumentSymbol(this.onDocumentSymbol.bind(this));
         this.connection.onCompletion(this.onCompletion.bind(this));
         this.connection.onHover(this.onHover.bind(this));
         this.connection.onReferences(this.onReferences.bind(this));
@@ -86,6 +91,7 @@ export class Server {
                     resolveProvider: false
                 },
                 definitionProvider: true,
+                documentSymbolProvider: true,
                 hoverProvider: true,
                 referencesProvider: true
             }
@@ -139,6 +145,50 @@ export class Server {
             .then(result => {
                 return result.body
                     .map(fileSpan => utils.tsServerFileSpanToLspLocation(fileSpan));
+            });
+    }
+
+    private onDocumentSymbol(params: TextDocumentPositionParams): Thenable<SymbolInformation[]> {
+        const path = utils.uriToPath(params.textDocument.uri);
+
+        this.logger.info('Server.onDocumentSymbol()', params, path);
+
+        return this.tsServerClient.sendNavTree(
+            path)
+            .then(result => {
+                // walk navtree in pre-order
+                const symbols: SymbolInformation[] = [],
+                    stack: TsProtocol.NavigationTree[] = [];
+
+                if (!!result.body) {
+                    stack.push(result.body);
+                }
+
+                while (stack.length > 0) {
+                    const item = stack.pop(),
+                        span = item.spans[0];
+
+                    if (span) {
+                        symbols.push({
+                            location: {
+                                uri: params.textDocument.uri,
+                                range: {
+                                    start: utils.tsServerLocationToLspPosition(span.start),
+                                    end: utils.tsServerLocationToLspPosition(span.end)
+                                }
+                            },
+                            // TODO: for now make everything as field for unknown
+                            kind: utils.symbolKindsMapping[item.kind] || SymbolKind.Field,
+                            name: item.text
+                        });
+                    }
+
+                    if (item.childItems) {
+                        item.childItems.forEach(childItem => stack.push(childItem));
+                    }
+                }
+
+                return symbols;
             });
     }
 
