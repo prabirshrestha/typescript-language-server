@@ -10,7 +10,11 @@ export function isWindows(): boolean {
 
 export function uriToPath(uri: string): string {
 	const p = path.resolve(uri.replace(/file:\/\/\//, ''));
-	return isWindows() ? p.replace(/\//g, "\\") : p;
+	return isWindows() ? p.replace(/\//g, '\\') : p;
+}
+
+export function pathToUri(p: string): string {
+	return 'file://' + (isWindows() ? '/' + p.replace(/\//g, '/') : p);
 }
 
 export const completionKindsMapping: { [name: string]: CompletionItemKind } = {

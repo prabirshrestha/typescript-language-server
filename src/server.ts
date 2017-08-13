@@ -2,6 +2,7 @@ import {
     createConnection,
     CompletionList,
     CompletionItem,
+    Definition,
     DidChangeTextDocumentParams,
     DidOpenTextDocumentParams,
     IConnection,
@@ -49,6 +50,7 @@ export class Server {
         this.connection.onDidSaveTextDocument(this.onDidSaveTextDocument.bind(this));
         this.connection.onDidCloseTextDocument(this.onDidCloseTextDocument.bind(this));
         this.connection.onDidChangeTextDocument(this.onDidChangeTextDocument.bind(this));
+        this.connection.onDefinition(this.onDefinition.bind(this));
         this.connection.onCompletion(this.onCompletion.bind(this));
     }
 
@@ -78,7 +80,8 @@ export class Server {
                 completionProvider: {
                     triggerCharacters: ['.'],
                     resolveProvider: false
-                }
+                },
+                definitionProvider: true
             }
         };
 
@@ -118,6 +121,35 @@ export class Server {
         this.tsServerClient.sendSaveTo(path, tempPath);
     }
 
+    private onDefinition(params: TextDocumentPositionParams): Thenable<Definition[]> {
+        const path = utils.uriToPath(params.textDocument.uri);
+
+        this.logger.info('Server.onDefinition()', params, path);
+
+        return this.tsServerClient.sendDefinition(
+            path,
+            params.position.line + 1,
+            params.position.character + 1)
+            .then(result => {
+                return result.body
+                    .map(definition => {
+                        return <Definition>{
+                            uri: utils.pathToUri(definition.file),
+                            range: {
+                                start: {
+                                    line: definition.start.line - 1,
+                                    character: definition.start.offset - 1
+                                },
+                                end: {
+                                    line: definition.end.line - 1,
+                                    character: definition.end.offset - 1
+                                }
+                            }
+                        };
+                    });
+            });
+    }
+
     private onCompletion(params: TextDocumentPositionParams): Thenable<CompletionList> {
         const path = utils.uriToPath(params.textDocument.uri);
 
@@ -128,10 +160,10 @@ export class Server {
             params.position.line + 1,
             params.position.character + 1,
             '')
-            .then(completions => {
+            .then(result  => {
                 return {
                     isIncomplete: false,
-                    items: completions.body
+                    items: result.body
                         .map(item => {
                             return <CompletionItem>{
                                 label: item.name,

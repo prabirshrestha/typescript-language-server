@@ -157,6 +157,12 @@ export class TsServerClient {
         this.sendRequest('reload', true, args);
     }
 
+    sendDefinition(file: string, line: number, offset: number): Thenable<any> {
+        const args = { file, line, offset };
+        this.logger.info('TsServerClient.sendDefinition()', args);
+        return this.sendRequest('definition', false, args);
+    }
+
     sendCompletions(file: string, line: number, offset: number, prefix: string): Thenable<any> {
         const args = { file, line, offset, prefix };
         this.logger.info('TsServerClient.sendCompletions()', args);
