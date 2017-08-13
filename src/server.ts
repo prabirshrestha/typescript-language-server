@@ -177,8 +177,8 @@ export class Server {
                                     end: utils.tsServerLocationToLspPosition(span.end)
                                 }
                             },
-                            // TODO: for now make everything as field for unknown
-                            kind: utils.symbolKindsMapping[item.kind] || SymbolKind.Field,
+                            // TODO: for now make everything as variable for unknown
+                            kind: utils.symbolKindsMapping[item.kind] || SymbolKind.Variable,
                             name: item.text
                         });
                     }

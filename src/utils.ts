@@ -62,18 +62,30 @@ export const completionKindsMapping: { [name: string]: CompletionItemKind } = {
     variable: CompletionItemKind.Variable
 };
 
-export const symbolKindsMapping: { [name: string]: CompletionItemKind } = {
+export const symbolKindsMapping: { [name: string]: SymbolKind } = {
+    'enum member': SymbolKind.Constant,
+    'JSX attribute': SymbolKind.Property,
+    'local class': SymbolKind.Class,
+    'local function': SymbolKind.Function,
+    'local var': SymbolKind.Variable,
+    'type parameter': SymbolKind.Variable,
+    alias: SymbolKind.Variable,
     class: SymbolKind.Class,
+    const: SymbolKind.Constant,
     constructor: SymbolKind.Constructor,
     enum: SymbolKind.Enum,
     field: SymbolKind.Field,
     file: SymbolKind.File,
     function: SymbolKind.Function,
+    getter: SymbolKind.Method,
     interface: SymbolKind.Interface,
+    let: SymbolKind.Variable,
     method: SymbolKind.Method,
     module: SymbolKind.Module,
+    parameter: SymbolKind.Variable,
     property: SymbolKind.Property,
-    variable: SymbolKind.Variable
+    setter: SymbolKind.Method,
+    var: SymbolKind.Variable
 };
 
 export class Deferred<T> {
