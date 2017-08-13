@@ -17,6 +17,15 @@ typescript-language-server --stdio
 
 **Note:** `typescript-language-server` requires `tsserver` to be in path. You can install it using `npm install -g typescript`.
 
+# Supported Protocol features
+
+* textDocument/completion
+* textDocument/definition
+* textDocument/didChange
+* textDocument/didClose
+* textDocument/didOpen
+* textDocument/didSave
+
 # Development
 
 ### Build
