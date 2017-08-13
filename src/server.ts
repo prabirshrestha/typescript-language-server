@@ -5,6 +5,7 @@ import {
     Definition,
     DidChangeTextDocumentParams,
     DidOpenTextDocumentParams,
+    Hover,
     IConnection,
     InitializeParams,
     InitializeResult,
@@ -53,6 +54,7 @@ export class Server {
         this.connection.onDidChangeTextDocument(this.onDidChangeTextDocument.bind(this));
         this.connection.onDefinition(this.onDefinition.bind(this));
         this.connection.onCompletion(this.onCompletion.bind(this));
+        this.connection.onHover(this.onHover.bind(this));
         this.connection.onReferences(this.onReferences.bind(this));
     }
 
@@ -84,6 +86,7 @@ export class Server {
                     resolveProvider: false
                 },
                 definitionProvider: true,
+                hoverProvider: true,
                 referencesProvider: true
             }
         };
@@ -159,6 +162,26 @@ export class Server {
                                 kind: utils.completionKindsMapping[item.kind]
                             };
                         })
+                };
+            });
+    }
+
+    private onHover(params: TextDocumentPositionParams): Thenable<Hover> {
+        const path = utils.uriToPath(params.textDocument.uri);
+
+        this.logger.info('Server.onHover()', params, path);
+
+        return this.tsServerClient.sendQuickInfo(
+            path,
+            params.position.line + 1,
+            params.position.character + 1)
+            .then(result => {
+                return <Hover>{
+                    contents: result.body.displayString,
+                    range: {
+                        start: utils.tsServerLocationToLspPosition(result.body.start),
+                        end: utils.tsServerLocationToLspPosition(result.body.end)
+                    }
                 };
             });
     }

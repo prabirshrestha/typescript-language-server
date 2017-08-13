@@ -72,10 +72,10 @@ export class TsServerClient {
             } else {
                 const contentLength = this.header['Content-Length'] + 1;
                 if (this.buffer.length >= contentLength) {
-                    this.logger.info('we have the full message');
-                    const message: protocol.Response = JSON.parse(this.buffer.substring(0, contentLength));
+                    const messageString = this.buffer.substring(0, contentLength);
+                    this.logger.info('we have the full message', this.header, messageString);
+                    const message: protocol.Response = JSON.parse(messageString);
                     this.buffer = this.buffer.substring(contentLength);
-                    // this.logger.info('<--- received full message', { message, header: this.header, buffer: this.buffer });
                     this.header = null;
 
                     this.processMessage(message);
@@ -167,6 +167,12 @@ export class TsServerClient {
         const args = { file, line, offset, prefix };
         this.logger.info('TsServerClient.sendCompletions()', args);
         return this.sendRequest('completions', false, args);
+    }
+
+    sendQuickInfo(file: string, line: number, offset: number): Thenable<any> {
+        const args = { file, line, offset };
+        this.logger.info('TsServerClient.sendQuickInfo()', args);
+        return this.sendRequest('quickinfo', false, args);
     }
 
     sendReferences(file: string, line: number, offset: number): Thenable<any> {

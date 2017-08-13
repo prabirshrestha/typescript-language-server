@@ -1,6 +1,9 @@
 import * as path from 'path';
 
-import { Location } from 'vscode-languageserver';
+import {
+    Location,
+    Position
+} from 'vscode-languageserver';
 
 import * as TsProtocol from 'typescript/lib/protocol';
 
@@ -18,21 +21,22 @@ export function uriToPath(uri: string): string {
 }
 
 export function pathToUri(p: string): string {
-	return 'file://' + (isWindows() ? '/' + p.replace(/\//g, '/') : p);
+    return 'file://' + (isWindows() ? '/' + p.replace(/\//g, '/') : p);
+}
+
+export function tsServerLocationToLspPosition(location: TsProtocol.Location): Position {
+    return <Position>{
+        line: location.line - 1,
+        character: location.offset - 1
+    }
 }
 
 export function tsServerFileSpanToLspLocation(fileSpan: TsProtocol.FileSpan): Location {
     return <Location>{
         uri: pathToUri(fileSpan.file),
         range: {
-            start: {
-                line: fileSpan.start.line - 1,
-                character: fileSpan.start.offset - 1
-            },
-            end: {
-                line: fileSpan.end.line - 1,
-                character: fileSpan.end.offset - 1
-            }
+            start: tsServerLocationToLspPosition(fileSpan.start),
+            end: tsServerLocationToLspPosition(fileSpan.end)
         }
     };
 }
