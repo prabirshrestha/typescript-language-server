@@ -163,6 +163,12 @@ export class TsServerClient {
         return this.sendRequest('definition', false, args);
     }
 
+    sendNavTree(file: string): Thenable<any> {
+        const args = { file };
+        this.logger.info('TsServerClient.sendNavTree()', args);
+        return this.sendRequest('navtree', false, args);
+    }
+
     sendCompletions(file: string, line: number, offset: number, prefix: string): Thenable<any> {
         const args = { file, line, offset, prefix };
         this.logger.info('TsServerClient.sendCompletions()', args);

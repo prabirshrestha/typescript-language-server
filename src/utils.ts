@@ -2,7 +2,8 @@ import * as path from 'path';
 
 import {
     Location,
-    Position
+    Position,
+    SymbolKind
 } from 'vscode-languageserver';
 
 import * as TsProtocol from 'typescript/lib/protocol';
@@ -59,6 +60,20 @@ export const completionKindsMapping: { [name: string]: CompletionItemKind } = {
     unit: CompletionItemKind.Unit,
     value: CompletionItemKind.Value,
     variable: CompletionItemKind.Variable
+};
+
+export const symbolKindsMapping: { [name: string]: CompletionItemKind } = {
+    class: SymbolKind.Class,
+    constructor: SymbolKind.Constructor,
+    enum: SymbolKind.Enum,
+    field: SymbolKind.Field,
+    file: SymbolKind.File,
+    function: SymbolKind.Function,
+    interface: SymbolKind.Interface,
+    method: SymbolKind.Method,
+    module: SymbolKind.Module,
+    property: SymbolKind.Property,
+    variable: SymbolKind.Variable
 };
 
 export class Deferred<T> {
