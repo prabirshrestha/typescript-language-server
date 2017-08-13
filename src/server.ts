@@ -8,6 +8,7 @@ import {
     IConnection,
     InitializeParams,
     InitializeResult,
+    Location,
     TextDocumentPositionParams,
     TextDocumentSyncKind
 } from 'vscode-languageserver';
@@ -52,6 +53,7 @@ export class Server {
         this.connection.onDidChangeTextDocument(this.onDidChangeTextDocument.bind(this));
         this.connection.onDefinition(this.onDefinition.bind(this));
         this.connection.onCompletion(this.onCompletion.bind(this));
+        this.connection.onReferences(this.onReferences.bind(this));
     }
 
     listen() {
@@ -81,7 +83,8 @@ export class Server {
                     triggerCharacters: ['.'],
                     resolveProvider: false
                 },
-                definitionProvider: true
+                definitionProvider: true,
+                referencesProvider: true
             }
         };
 
@@ -121,7 +124,7 @@ export class Server {
         this.tsServerClient.sendSaveTo(path, tempPath);
     }
 
-    private onDefinition(params: TextDocumentPositionParams): Thenable<Definition[]> {
+    private onDefinition(params: TextDocumentPositionParams): Thenable<Definition> {
         const path = utils.uriToPath(params.textDocument.uri);
 
         this.logger.info('Server.onDefinition()', params, path);
@@ -132,21 +135,7 @@ export class Server {
             params.position.character + 1)
             .then(result => {
                 return result.body
-                    .map(definition => {
-                        return <Definition>{
-                            uri: utils.pathToUri(definition.file),
-                            range: {
-                                start: {
-                                    line: definition.start.line - 1,
-                                    character: definition.start.offset - 1
-                                },
-                                end: {
-                                    line: definition.end.line - 1,
-                                    character: definition.end.offset - 1
-                                }
-                            }
-                        };
-                    });
+                    .map(fileSpan => utils.tsServerFileSpanToLspLocation(fileSpan));
             });
     }
 
@@ -171,6 +160,21 @@ export class Server {
                             };
                         })
                 };
+            });
+    }
+
+    private onReferences(params: TextDocumentPositionParams): Thenable<Location[]> {
+        const path = utils.uriToPath(params.textDocument.uri);
+
+        this.logger.info('Server.onReferences()', params, path);
+
+        return this.tsServerClient.sendReferences(
+            path,
+            params.position.line + 1,
+            params.position.character + 1)
+            .then(result => {
+                return result.body.refs
+                    .map(fileSpan => utils.tsServerFileSpanToLspLocation(fileSpan));
             });
     }
 

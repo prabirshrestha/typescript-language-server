@@ -63,7 +63,7 @@ export class TsServerClient {
                                 this.header[kvp[0]] = kvp[1];
                             }
                         });
-                    
+
                     this.buffer = this.buffer.substring(headerEndIndex + 4);
                 } else {
                     this.logger.info('wait for next buffer to arrive');
@@ -77,7 +77,7 @@ export class TsServerClient {
                     this.buffer = this.buffer.substring(contentLength);
                     // this.logger.info('<--- received full message', { message, header: this.header, buffer: this.buffer });
                     this.header = null;
-                    
+
                     this.processMessage(message);
 
                     if (this.buffer.length > 0) {
@@ -168,4 +168,11 @@ export class TsServerClient {
         this.logger.info('TsServerClient.sendCompletions()', args);
         return this.sendRequest('completions', false, args);
     }
+
+    sendReferences(file: string, line: number, offset: number): Thenable<any> {
+        const args = { file, line, offset };
+        this.logger.info('TsServerClient.sendReferences()', args);
+        return this.sendRequest('references', false, args);
+    }
+
 }
