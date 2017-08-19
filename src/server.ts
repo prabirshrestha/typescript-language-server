@@ -28,7 +28,7 @@ import * as utils from './utils';
 
 export interface IServerOptions {
     logFile?: string;
-    tsserverPath?: string;
+    tsserverPath: string;
     tsserverLogFile?: string;
 }
 
@@ -76,7 +76,7 @@ export class Server {
         this.initializeParams = params;
 
         this.tsServerClient = new TsServerClient({
-            tsserverPath: this.options.tsserverPath || (utils.isWindows() ? 'tsserver.cmd' : 'tsserver'),
+            tsserverPath: this.options.tsserverPath,
             logFile: this.options.tsserverLogFile,
             logger: this.logger
         });
