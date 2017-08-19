@@ -1,14 +1,14 @@
 #!/usr/bin/env node
 
-import * as program from 'commander';
+import { Command } from 'commander';
 
 import { Server } from './server';
 
-program
+const program = new Command('typescript-language-server')
     .version(require('../package.json').version)
     .option('--stdio', 'use stdio')
     .option('--node-ipc', 'use node-ipc')
-    .option('--socket', 'use socket. example: --socket=5000')
+    .option('--socket <port>', 'use socket. example: --socket=5000')
     .parse(process.argv);
 
 if (!(program.stdio || program.socket || program['node-ipc'])) {
