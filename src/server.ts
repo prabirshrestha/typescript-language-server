@@ -279,7 +279,7 @@ export class Server {
                     // TODO: for now make everything as variable for unknown
                     kind: utils.symbolKindsMapping[item.kind] || SymbolKind.Variable,
                     name: item.name
-                });
+                };
             });
         });
     }
