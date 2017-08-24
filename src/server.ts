@@ -13,7 +13,8 @@ import {
     SymbolKind,
     SymbolInformation,
     TextDocumentPositionParams,
-    TextDocumentSyncKind
+    TextDocumentSyncKind,
+    WorkspaceSymbolParams
 } from 'vscode-languageserver';
 
 import * as tempy from 'tempy';
@@ -42,6 +43,8 @@ export class Server {
 
     logger: ILogger;
 
+    private _lastFile: string; // dummy file required for navto
+
     constructor(
         private options: IServerOptions) {
         this.logger = createLogger(options.logFile);
@@ -61,6 +64,7 @@ export class Server {
         this.connection.onCompletion(this.onCompletion.bind(this));
         this.connection.onHover(this.onHover.bind(this));
         this.connection.onReferences(this.onReferences.bind(this));
+        this.connection.onWorkspaceSymbol(this.onWorkspaceSymbol.bind(this));
     }
 
     listen() {
@@ -93,7 +97,8 @@ export class Server {
                 definitionProvider: true,
                 documentSymbolProvider: true,
                 hoverProvider: true,
-                referencesProvider: true
+                referencesProvider: true,
+                workspaceSymbolProvider: true
             }
         };
 
@@ -103,6 +108,7 @@ export class Server {
 
     private onDidOpenTextDocument(params: DidOpenTextDocumentParams): void {
         const path = utils.uriToPath(params.textDocument.uri);
+        this._lastFile = path;
         this.logger.info('Server.onDidOpenTextDocument()', params, path);
         this.tsServerClient.sendOpen(path);
     }
@@ -117,6 +123,8 @@ export class Server {
         const path = utils.uriToPath(params.textDocument.uri),
             tempPath = tempy.file({ extension: 'ts'});
 
+        this._lastFile = path;
+
         this.logger.info('Server.onDidCloseTextDocument()', params, path, tempPath);
 
         fs.writeFileSync(tempPath, params.contentChanges[0].text, 'utf8');
@@ -126,6 +134,8 @@ export class Server {
     private onDidSaveTextDocument(params: DidChangeTextDocumentParams): void {
         const path = utils.uriToPath(params.textDocument.uri),
             tempPath = tempy.file({ extension: 'ts'});
+
+        this._lastFile = path;
 
         this.logger.info('Server.onDidChangeTextDocument()', params, path, tempPath);
 
@@ -250,5 +260,29 @@ export class Server {
                     .map(fileSpan => utils.tsServerFileSpanToLspLocation(fileSpan));
             });
     }
+
+    private onWorkspaceSymbol(params: WorkspaceSymbolParams): Thenable<SymbolInformation[]> {
+        return this.tsServerClient.sendNavTo(
+            params.query,
+            this._lastFile
+        )
+        .then((result) => {
+            return result.body.map(item => {
+                return <SymbolInformation>{
+                    location: {
+                        uri: utils.pathToUri(item.file),
+                        range: {
+                            start: utils.tsServerLocationToLspPosition(item.start),
+                            end: utils.tsServerLocationToLspPosition(item.end)
+                        }
+                    },
+                    // TODO: for now make everything as variable for unknown
+                    kind: utils.symbolKindsMapping[item.kind] || SymbolKind.Variable,
+                    name: item.name
+                });
+            });
+        });
+    }
+
 
 }
