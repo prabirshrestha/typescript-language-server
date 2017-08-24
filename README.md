@@ -28,6 +28,7 @@ typescript-language-server --stdio
 * textDocument/documentSymbol
 * textDocument/hover
 * textDocument/references
+* workspace/symbol
 
 # Development
 
