@@ -187,6 +187,12 @@ export class TsServerClient {
         return this.sendRequest('quickinfo', false, args);
     }
 
+    sendRename(file: string, line: number, offset: number): Thenable<any> {
+        const args = { file, line, offset };
+        this.logger.info('TsServerClient.sendRename()', args);
+        return this.sendRequest('rename', false, args);
+    }
+
     sendReferences(file: string, line: number, offset: number): Thenable<any> {
         const args = { file, line, offset };
         this.logger.info('TsServerClient.sendReferences()', args);
