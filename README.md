@@ -46,6 +46,7 @@ $ typescript-language-server --help
 * textDocument/didSave
 * textDocument/documentSymbol
 * textDocument/hover
+* textDocument/rename
 * textDocument/references
 * workspace/symbol
 

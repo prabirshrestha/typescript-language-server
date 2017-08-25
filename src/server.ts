@@ -10,11 +10,14 @@ import {
     InitializeParams,
     InitializeResult,
     Location,
+    RenameParams,
     SymbolKind,
     SymbolInformation,
     TextDocumentPositionParams,
     TextDocumentSyncKind,
-    WorkspaceSymbolParams
+    TextEdit,
+    WorkspaceSymbolParams,
+    WorkspaceEdit,
 } from 'vscode-languageserver';
 
 import * as tempy from 'tempy';
@@ -64,6 +67,7 @@ export class Server {
         this.connection.onCompletion(this.onCompletion.bind(this));
         this.connection.onHover(this.onHover.bind(this));
         this.connection.onReferences(this.onReferences.bind(this));
+        this.connection.onRenameRequest(this.onRename.bind(this));
         this.connection.onWorkspaceSymbol(this.onWorkspaceSymbol.bind(this));
     }
 
@@ -97,6 +101,7 @@ export class Server {
                 definitionProvider: true,
                 documentSymbolProvider: true,
                 hoverProvider: true,
+                renameProvider: true,
                 referencesProvider: true,
                 workspaceSymbolProvider: true
             }
@@ -243,6 +248,44 @@ export class Server {
                         end: utils.tsServerLocationToLspPosition(result.body.end)
                     }
                 };
+            });
+    }
+
+    private onRename(params: RenameParams): Thenable<WorkspaceEdit> {
+        const path = utils.uriToPath(params.textDocument.uri);
+
+        this.logger.info('Server.onRename()', params, path);
+
+        return this.tsServerClient.sendRename(
+            path,
+            params.position.line + 1,
+            params.position.character + 1)
+            .then(result => {
+                if (!result.body || !result.body.info.canRename || result.body.locs.length == 0) {
+                    return <WorkspaceEdit>{};
+                }
+
+                const workspaceEdit = <WorkspaceEdit>{
+                    changes: {}
+                };
+
+                result.body.locs
+                    .forEach((spanGroup) => {
+                        const uri = utils.pathToUri(spanGroup.file),
+                            textEdits = workspaceEdit.changes[uri] || (workspaceEdit.changes[uri] = []);
+
+                        spanGroup.locs.forEach((textSpan) => {
+                            textEdits.push(<TextEdit>{
+                                newText: params.newName,
+                                range: {
+                                    start: utils.tsServerLocationToLspPosition(textSpan.start),
+                                    end: utils.tsServerLocationToLspPosition(textSpan.end)
+                                }
+                            });
+                        });
+                });
+
+                return workspaceEdit;
             });
     }
 
