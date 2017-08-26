@@ -93,7 +93,13 @@ export class Server {
 
         this.initializeResult = {
             capabilities: {
-                textDocumentSync: TextDocumentSyncKind.Full,
+                textDocumentSync: {
+                    change: TextDocumentSyncKind.Full,
+                    openClose: true,
+                    save: {
+                        includeText: true
+                    }
+                },
                 completionProvider: {
                     triggerCharacters: ['.'],
                     resolveProvider: false
