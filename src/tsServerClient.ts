@@ -70,7 +70,7 @@ export class TsServerClient {
                     break;
                 }
             } else {
-                const contentLength = this.header['Content-Length'] + 1;
+                const contentLength = this.header['Content-Length'];
                 if (this.buffer.length >= contentLength) {
                     const messageString = this.buffer.substring(0, contentLength);
                     this.logger.info('we have the full message', this.header, messageString);
@@ -79,7 +79,6 @@ export class TsServerClient {
                     this.header = null;
 
                     this.processMessage(message);
-
                     if (this.buffer.length > 0) {
                         this.logger.info('we have more data in the buffer so try parsing the new headers from top', this.buffer);
                         continue
@@ -88,7 +87,7 @@ export class TsServerClient {
                         break
                     }
                 } else {
-                    this.logger.info('we do not have the entire message body, so wait for the next bufer');
+                    this.logger.info('we do not have the entire message body, so wait for the next buffer');
                     break;
                 }
             }
