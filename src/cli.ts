@@ -10,6 +10,7 @@ const program = new Command('typescript-language-server')
     .option('--stdio', 'use stdio')
     .option('--node-ipc', 'use node-ipc')
     .option('--socket <port>', 'use socket. example: --socket=5000')
+    .option('--logFile <logFile>', 'Specify a log file. example: --logFile=logs.txt')
     .option('--tsserver-path <path>',
         `absolute path to tsserver. example: --tsserver-path=${utils.isWindows() ? 'c:\\tsc\\tsserver.cmd' : '/bin/tsserver'}`,
         utils.isWindows() ? 'tsserver.cmd' : 'tsserver')
@@ -21,5 +22,6 @@ if (!(program.stdio || program.socket || program['node-ipc'])) {
 }
 
 new Server({
-    tsserverPath: program.tsserverPath
+    tsserverPath: program.tsserverPath,
+    logFile : program.logFile
 }).listen();
