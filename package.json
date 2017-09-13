@@ -1,5 +1,5 @@
 {
-  "name": "typescript-language-server",
+  "name": "ts-language-server",
   "version": "0.0.17",
   "description": "Language Server Protocol (LSP) implementation for TypeScript using tsserver",
   "scripts": {
@@ -19,7 +19,8 @@
     "@types/node": "^8.0.19",
     "@types/pino": "^3.0.1",
     "chai": "^4.1.2",
-    "typescript": "^2.4.2"
+    "typescript": "^2.4.2",
+    "mocha": "^3.5.3"
   },
   "dependencies": {
     "commander": "^2.11.0",
