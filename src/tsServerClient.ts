@@ -70,7 +70,7 @@ export class TsServerClient {
                     break;
                 }
             } else {
-                const contentLength = this.header['Content-Length'] + 1;
+                const contentLength = this.header['Content-Length'];
                 if (this.buffer.length >= contentLength) {
                     const messageString = this.buffer.substring(0, contentLength);
                     this.logger.info('we have the full message', this.header, messageString);
@@ -79,7 +79,6 @@ export class TsServerClient {
                     this.header = null;
 
                     this.processMessage(message);
-
                     if (this.buffer.length > 0) {
                         this.logger.info('we have more data in the buffer so try parsing the new headers from top', this.buffer);
                         continue
@@ -88,7 +87,7 @@ export class TsServerClient {
                         break
                     }
                 } else {
-                    this.logger.info('we do not have the entire message body, so wait for the next bufer');
+                    this.logger.info('we do not have the entire message body, so wait for the next buffer');
                     break;
                 }
             }
@@ -133,9 +132,8 @@ export class TsServerClient {
         }
     }
 
-    sendOpen(file: string): void {
-        const args = { file };
-        this.logger.info('TsServerClient.sendOpen()', file);
+    sendOpen(args: protocol.OpenRequestArgs): void {
+        this.logger.info('TsServerClient.sendOpen()', args);
         this.sendRequest('open', true, args);
     }
 
@@ -151,10 +149,9 @@ export class TsServerClient {
         this.sendRequest('saveto', true, args);
     }
 
-    sendReload(file: string, tmpfile: string): void {
-        const args = { file, tmpfile };
-        this.logger.info('TsServerClient.sendReload()', file, tmpfile);
-        this.sendRequest('reload', true, args);
+    sendChange(args: protocol.ChangeRequestArgs): void {
+        this.logger.info('TsServerClient.sendReload()', args);
+        this.sendRequest('change', true, args);
     }
 
     sendDefinition(file: string, line: number, offset: number): Thenable<any> {
@@ -193,8 +190,7 @@ export class TsServerClient {
         return this.sendRequest('rename', false, args);
     }
 
-    sendReferences(file: string, line: number, offset: number): Thenable<any> {
-        const args = { file, line, offset };
+    sendReferences(args: protocol.FileLocationRequestArgs): Thenable<any> {
         this.logger.info('TsServerClient.sendReferences()', args);
         return this.sendRequest('references', false, args);
     }

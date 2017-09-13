@@ -46,8 +46,6 @@ export class Server {
 
     logger: ILogger;
 
-    private _lastFile: string; // dummy file required for navto
-
     constructor(
         private options: IServerOptions) {
         this.logger = createLogger(options.logFile);
@@ -93,13 +91,7 @@ export class Server {
 
         this.initializeResult = {
             capabilities: {
-                textDocumentSync: {
-                    change: TextDocumentSyncKind.Full,
-                    openClose: true,
-                    save: {
-                        includeText: true
-                    }
-                },
+                textDocumentSync: TextDocumentSyncKind.Incremental,
                 completionProvider: {
                     triggerCharacters: ['.'],
                     resolveProvider: false
@@ -119,9 +111,12 @@ export class Server {
 
     private onDidOpenTextDocument(params: DidOpenTextDocumentParams): void {
         const path = utils.uriToPath(params.textDocument.uri);
-        this._lastFile = path;
         this.logger.info('Server.onDidOpenTextDocument()', params, path);
-        this.tsServerClient.sendOpen(path);
+        this.tsServerClient.sendOpen({
+            file: path, 
+            fileContent: params.textDocument.text
+        });
+        //TODO request diagnostics
     }
 
     private onDidCloseTextDocument(params: DidOpenTextDocumentParams): void {
@@ -131,22 +126,26 @@ export class Server {
     }
 
     private onDidChangeTextDocument(params: DidChangeTextDocumentParams): void {
-        const path = utils.uriToPath(params.textDocument.uri),
-            tempPath = tempy.file({ extension: 'ts'});
+        const path = utils.uriToPath(params.textDocument.uri)
 
-        this._lastFile = path;
+        this.logger.info('Server.onDidCloseTextDocument()', params, path);
 
-        this.logger.info('Server.onDidCloseTextDocument()', params, path, tempPath);
-
-        fs.writeFileSync(tempPath, params.contentChanges[0].text, 'utf8');
-        this.tsServerClient.sendReload(path, tempPath);
+        for (const change of params.contentChanges) {
+            this.tsServerClient.sendChange({
+                file: path,
+                line: change.range.start.line + 1,
+                offset: change.range.start.character + 1,
+                endLine: change.range.end.line + 1,
+                endOffset: change.range.end.character + 1,
+                insertString: change.text
+            });
+        }
+        //TODO request diagnostics
     }
 
     private onDidSaveTextDocument(params: DidChangeTextDocumentParams): void {
         const path = utils.uriToPath(params.textDocument.uri),
             tempPath = tempy.file({ extension: 'ts'});
-
-        this._lastFile = path;
 
         this.logger.info('Server.onDidChangeTextDocument()', params, path, tempPath);
 
@@ -300,37 +299,39 @@ export class Server {
 
         this.logger.info('Server.onReferences()', params, path);
 
-        return this.tsServerClient.sendReferences(
-            path,
-            params.position.line + 1,
-            params.position.character + 1)
-            .then(result => {
-                return result.body.refs
-                    .map(fileSpan => utils.tsServerFileSpanToLspLocation(fileSpan));
-            });
+        return this.tsServerClient.sendReferences({
+            file: path,
+            line: params.position.line + 1,
+            offset: params.position.character + 1
+        }).then(result => {
+            return result.body.refs
+                .map(fileSpan => utils.tsServerFileSpanToLspLocation(fileSpan));
+        });
     }
 
     private onWorkspaceSymbol(params: WorkspaceSymbolParams): Thenable<SymbolInformation[]> {
-        return this.tsServerClient.sendNavTo(
-            params.query,
-            this._lastFile
-        )
-        .then((result) => {
-            return result.body.map(item => {
-                return <SymbolInformation>{
-                    location: {
-                        uri: utils.pathToUri(item.file),
-                        range: {
-                            start: utils.tsServerLocationToLspPosition(item.start),
-                            end: utils.tsServerLocationToLspPosition(item.end)
-                        }
-                    },
-                    // TODO: for now make everything as variable for unknown
-                    kind: utils.symbolKindsMapping[item.kind] || SymbolKind.Variable,
-                    name: item.name
-                };
-            });
-        });
+        // TODO
+        // return this.tsServerClient.sendNavTo(
+        //     params.query,
+        //     this._lastFile
+        // )
+        // .then((result) => {
+        //     return result.body.map(item => {
+        //         return <SymbolInformation>{
+        //             location: {
+        //                 uri: utils.pathToUri(item.file),
+        //                 range: {
+        //                     start: utils.tsServerLocationToLspPosition(item.start),
+        //                     end: utils.tsServerLocationToLspPosition(item.end)
+        //                 }
+        //             },
+        //             // TODO: for now make everything as variable for unknown
+        //             kind: utils.symbolKindsMapping[item.kind] || SymbolKind.Variable,
+        //             name: item.name
+        //         };
+        //     });
+        // });
+        return Promise.resolve([]);
     }
 
 
