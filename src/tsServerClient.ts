@@ -70,7 +70,7 @@ export class TsServerClient {
                     break;
                 }
             } else {
-                const contentLength = this.header['Content-Length'] + 1;
+                const contentLength = this.header['Content-Length'];
                 if (this.buffer.length >= contentLength) {
                     const messageString = this.buffer.substring(0, contentLength);
                     this.logger.info('we have the full message', this.header, messageString);
