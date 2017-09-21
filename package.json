@@ -1,6 +1,6 @@
 {
   "name": "typescript-language-server",
-  "version": "0.0.17",
+  "version": "0.0.19",
   "description": "Language Server Protocol (LSP) implementation for TypeScript using tsserver",
   "scripts": {
     "build": "tsc -p src",
@@ -15,13 +15,13 @@
   "devDependencies": {
     "@types/commander": "^2.9.1",
     "@types/node": "^8.0.19",
-    "@types/pino": "^3.0.1",
-    "typescript": "^2.4.2"
+    "@types/pino": "^3.0.1"
   },
   "dependencies": {
     "commander": "^2.11.0",
     "pino": "^4.7.1",
     "tempy": "^0.1.0",
+    "typescript": "^2.5.2",
     "vscode-languageserver": "^3.3.0"
   }
 }
