@@ -32,6 +32,7 @@ $ typescript-language-server --help
     --stdio                 use stdio
     --node-ipc              use node-ipc
     --socket <port>         use socket. example: --socket=5000
+    --log-file <path>       specify log file. example: --log-file=./ts-log.txt
     --tsserver-path <path>  absolute path to tsserver. example: --tsserver-path=c:\tsc\tsserver
     -h, --help              output usage information
 ```
