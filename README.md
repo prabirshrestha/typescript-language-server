@@ -1,5 +1,6 @@
 # typescript-language-server
-[Language Server Protocol](https://github.com/Microsoft/language-server-protocol) implementation for Typescript via tsserver.cmd :warning: Deprecated in favor of https://github.com/theia-ide/typescript-lsp :warning:
+[Language Server Protocol](https://github.com/Microsoft/language-server-protocol) implementation for Typescript via tsserver.cmd 
+**:warning: Deprecated in favor of https://github.com/theia-ide/typescript-language-server :warning:**
 
 [![https://nodei.co/npm/typescript-language-server.png?downloads=true&downloadRank=true&stars=true](https://nodei.co/npm/typescript-language-server.png?downloads=true&downloadRank=true&stars=true)](https://www.npmjs.com/package/typescript-language-server)
 
